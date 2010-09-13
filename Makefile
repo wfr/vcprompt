@@ -13,7 +13,19 @@ $(objects): $(headers)
 
 .PHONY: check
 check: vcprompt
-	./tests/test-simple
+	cd tests && ./test-simple
+
+gitrepo = tests/git-repo.tar
+
+check-git: vcprompt $(gitrepo)
+	cd tests && ./test-git
+
+$(gitrepo): tests/setup-git
+	cd tests && ./setup-git
+
+# target check-all requires that all supported VC tools be
+# installed
+check-all: check check-git
 
 clean:
 	rm -f $(objects) vcprompt

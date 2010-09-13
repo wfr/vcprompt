@@ -16,6 +16,8 @@ result_t* init_result()
 
 void free_result(result_t* result)
 {
+    free(result->revision);
+    free(result->branch);
     free(result);
 }
 
@@ -24,6 +26,25 @@ static options_t* _options = NULL;
 void set_options(options_t* options)
 {
     _options = options;
+}
+
+int result_set_revision(result_t* result, const char *revision, int len)
+{
+    if (result->revision)
+        free(result->revision);
+    if (len == -1)
+        result->revision = strdup(revision);
+    else
+        result->revision = strndup(revision, len);
+    return !!result->revision;
+}
+
+int result_set_branch(result_t* result, const char *branch)
+{
+    if (result->branch)
+        free(result->branch);
+    result->branch = strdup(branch);
+    return !!result->branch;
 }
 
 vccontext_t* init_context(const char *name,
