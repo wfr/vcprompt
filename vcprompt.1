@@ -33,10 +33,9 @@ almost all supported version control systems.
 You can get different information by specifying a format string with
 the -f option. See \fBFORMAT STRINGS\fR below.
 
-In a directory that is not under the control of a supported version
-control system,
+If the current directory is not under version control,
 .B vcprompt
-terminates quickly and with no output.
+terminates quickly with no output.
 
 .SH OPTIONS
 .IP -d
@@ -85,7 +84,7 @@ A single "?" if there are any unknown (untracked) files in the working
 dir. Slow.
 .TP
 .B %m
-a single "+" if there are any uncommitted changes (modified, added, or
+A single "+" if there are any uncommitted changes (modified, added, or
 removed files) in the working dir. Slow.
 .TP
 .B %%
@@ -112,37 +111,28 @@ considers the current directory a git working dir if directory
 .I .git
 exists.
 
-Format specifier
 .B %b
-(branch) is supported by reading file
+(branch) is supported by reading
 .I .git/HEAD
 directly. If that file does not refer to a branch (e.g. you have
 checked out a specified commit), then
 .B vcprompt
 reports the branch as "unknown".
 
-Format specifier
 .B %r
 (revision) expands to the first 12 characters of the commit ID of
 HEAD.
 
-Format specifier
 .B %p
 is not yet implemented.
 
-Format specifier
 .B %u
 is supported by running "git ls-files --others --exclude-standard", so
-it can be expensive in a large working dir.
+it can be slow in a large working dir.
 
-Format specifier
 .B %m
 is supported by running "git diff --no-ext-diff --quiet --exit-code",
-so it can be expensive in a large working dir.
-
-The timeout (-t) option is useful to prevent
-.B vcprompt
-from taking too long in large working dirs.
+so it can be slow in a large working dir.
 
 .SH MERCURIAL (HG) SUPPORT
 
@@ -152,7 +142,6 @@ directory
 .I .hg
 exists.
 
-Format specifier
 .B %b
 (branch) is supported by looking for the current Mercurial bookmark (
 .I .hg/bookmarks.current
@@ -160,7 +149,6 @@ Format specifier
 .I .hg/branch
 ) if no bookmark is current.
 
-Format specifier
 .B %r
 (revision) expands to the revision number of the parent of the working
 dir, or a comma-separated pair of revision numbers if a merge is
@@ -172,29 +160,30 @@ please report a bug in
 .B vcprompt
 !
 
-Format specifier
 .B %p
 is implemented by reading MQ internals.
 
-Format specifiers
 .B %u
 and
 .B %m
-are not implemented.
+are implemented by running "hg status", so they can be slow in a
+large working dir. Mercurial has to work harder to find unknown files
+than it does to find uncommitted changes, so using
+.B %u
+can be considerably more expensive than just
+.B %m.
 
 .SH SUBVERSION (SVN) SUPPORT
-
-.B vcprompt
-currently supports Subversion up to version 1.6. It doesn't yet
-recognize Subversion 1.7 working copies. Patches are welcome!
 
 .B vcprompt
 considers the current directory a Subversion (svn) working dir if
 directory
 .I .svn
 exists.
+.B vcprompt
+currently supports Subversion up to version 1.6. It doesn't yet
+recognize Subversion 1.7 working copies. Patches are welcome!
 
-Format specifier
 .B %b
 is not supported because Subversion has no guaranteed way to figure
 out the branch; projects can structure their repository however they
@@ -202,11 +191,9 @@ like, and there's no way to know which parts of the URL are just
 directories and which is the branch name. There might not even be a
 branch name.
 
-Format specifier
 .B %p
 is not implemented (it makes no sense with Subversion).
 
-Format specifiers
 .B %u
 and
 .B %m
@@ -219,7 +206,6 @@ considers the current directory a CVS working dir if file
 .I CVS/Entries
 exists.
 
-Format specifier
 .B %b
 (branch) is supported by reading
 .I CVS/Tag;
@@ -228,17 +214,14 @@ if that file does not exist,
 displays the branch as "trunk".
 .B vcprompt
 looks only in the current dir, not in any subdirectories, so it will
-not notice mixed-branch working dirs.
+not detect mixed-branch working dirs.
 
-Format specifier
 .B %r
 is not supported because CVS has no global revision ID.
 
-Format specifier
 .B %p
 is not implemented (it makes no sense with CVS).
 
-Format specifiers
 .B %u
 and
 .B %m
@@ -258,10 +241,10 @@ exist.
 All format specifiers depend on running "fossil" commands, so every
 operation in a Fossil working dir is slow. All format specifiers except
 .B %u
-depend on "fossil status", so there's no harm in using lots of format
-specifiers -- however, doing so
+depend on a single run of "fossil status", so there's no harm in using
+lots of format specifiers (however, doing so
 .I is
-expensive for other version control systems.
+expensive for other version control systems).
 
 Format specifier
 .B %p
@@ -270,7 +253,7 @@ is not implemented.
 Format specifier
 .B %u
 requires running "fossil extra", so has an extra penalty compared to
-the ther format specifiers.
+the other format specifiers.
 
 .SH CONFIGURING BASH
 
@@ -280,7 +263,7 @@ in your prompt. For example, add
 .nf
 .in +2m
 if [ "$PS1" ]; then
-  PS1='\u@\h $(vcprompt -f "[%b]")\$ '
+  PS1='\\u@\\h $(vcprompt -f "[%b]")\$ '
 fi
 .in -2m
 .fi
@@ -308,8 +291,7 @@ fi
 to your
 .I ~/.zshrc
 file. You can of course use all of zsh's prompt escapes in
-.B PROMPT;
-this example just uses "$ " for the rest of the prompt.
+.B PROMPT.
 
 .SH ENVIRONMENT
 .IP VCPROMPT_FORMAT

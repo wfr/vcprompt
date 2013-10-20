@@ -21,6 +21,7 @@
 #include <arpa/inet.h>
 #endif
 
+#include "capture.h"
 #include "common.h"
 #include "hg.h"
 
@@ -240,6 +241,46 @@ read_patch_name(vccontext_t *context, result_t *result)
     free(last_line);
 }
 
+static void
+read_modified_unknown(vccontext_t *context, result_t *result)
+{
+    // No easy way that we know to get the modified or unknown status
+    // without forking an hg process. Replace this with a more efficient version
+    // if you ever figure it out.
+    if (!context->options->show_modified && !context->options->show_unknown)
+        return;
+
+    char *argv[] = {"hg", "--quiet", "status",
+                    "--modified", "--added", "--removed",
+                    "--unknown", NULL};
+    if (!context->options->show_unknown) {
+        // asking hg to search for unknown files can be expensive, so
+        // skip it unless the user wants it
+        argv[6] = NULL;
+    }
+    capture_t *capture = capture_child("hg", argv);
+    if (capture == NULL) {
+        debug("unable to execute 'hg status'");
+        return;
+    }
+    char *cstdout = capture->childout.buf;
+    for (char *ch = cstdout; *ch != 0; ch++) {
+        if (ch == cstdout || *(ch-1) == '\n') {
+            // at start of output or start of line: look for ?, M, etc.
+            if (context->options->show_unknown && *ch == '?') {
+                result->unknown = 1;
+            }
+            if (context->options->show_modified &&
+                (*ch == 'M' || *ch == 'A' || *ch == 'R')) {
+                result->modified = 1;
+            }
+        }
+    }
+
+    cstdout = NULL;
+    free_capture(capture);
+}
+
 static result_t*
 hg_get_info(vccontext_t *context)
 {
@@ -262,6 +303,7 @@ hg_get_info(vccontext_t *context)
 
     read_parents(context, result);
     read_patch_name(context, result);
+    read_modified_unknown(context, result);
 
     return result;
 }
