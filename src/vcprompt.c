@@ -177,6 +177,7 @@ print_result(vccontext_t *context, options_t *options, result_t *result)
                 case 'p':
                     if (result->patch != NULL)
                         fputs(result->patch, stdout);
+                    break;
                 case 'u':
                     if (result->unknown)
                         putc('?', stdout);
