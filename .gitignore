@@ -1,0 +1,13 @@
+*.o
+vcprompt
+aclocal
+autom4te.cache
+config.*
+configure
+Makefile
+stamp-h
+tests/*-repo*.tar
+dist
+
+# Vim
+.*.swp
