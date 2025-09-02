@@ -60,26 +60,37 @@ git_get_info(vccontext_t *context)
             }
         }
     }
-    if (context->options->show_modified) {
-        char *argv[] = {
-            "git", "diff", "--no-ext-diff", "--quiet", "--exit-code", NULL};
-        capture_t *capture = capture_child("git", argv);
-        result->modified = (capture->status == 1);
 
-        /* any other outcome (including failure to fork/exec,
-           failure to run git, or diff error): assume no
-           modifications */
-        free_capture(capture);
-    }
-    if (context->options->show_unknown) {
-        char *argv[] = {
-            "git", "ls-files", "--others", "--exclude-standard", NULL};
-        capture_t *capture = capture_child("git", argv);
-        result->unknown = (capture != NULL && capture->childout.len > 0);
+    if (!context->options->show_modified && !context->options->show_unknown)
+        return result;
 
-        /* again, ignore other errors and assume no unknown files */
-        free_capture(capture);
+    char *argv[] = {
+        "git", "status", "--porcelain", "--untracked-files=normal", NULL};
+    if (!context->options->show_unknown) {
+        // asking git to search for unknown files can be expensive, so
+        // skip it unless the user wants it
+        argv[3] = "--untracked-files=no";
     }
+    capture_t *capture = capture_child("git", argv);
+    if (capture == NULL) {
+        debug("unable to execute 'git status'");
+        goto err;
+    }
+    char *cstdout = capture->childout.buf;
+    for (char *ch = cstdout; *ch != 0; ch++) {
+        if (ch == cstdout || *(ch-1) == '\n') {
+            // at start of output or start of line: look for ?, M, etc.
+            if (context->options->show_unknown && *ch == '?') {
+                result->unknown = 1;
+            }
+            else if (context->options->show_modified && *(ch+1) != ' ') {
+                result->modified = 1;
+            }
+        }
+    }
+
+    cstdout = NULL;
+    free_capture(capture);
 
     return result;
 
