@@ -70,7 +70,13 @@ prefix of the one you want -- e.g., to use the brew package:
 To see which features are built-in to your vcprompt binary, run
 
     ./vcprompt -F
-    
+
+Optional: statically linked executable
+--------------------------------------
+```
+apt-get install musl-tools
+CC="musl-gcc -static" ./configure && make
+```
 
 Configuration
 =============

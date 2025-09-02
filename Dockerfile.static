@@ -1,0 +1,9 @@
+FROM debian:13-slim
+
+RUN apt-get update && \
+	apt-get install -y build-essential autoconf musl musl-dev musl-tools
+
+WORKDIR /work
+ENTRYPOINT autoreconf -i && \
+	CC="musl-gcc -static" ./configure && \
+	make

@@ -1,0 +1,7 @@
+#!/bin/bash
+set -eu pipefail
+thisdir="$(dirname "$(readlink -f "$0")")"
+podman build --pull=newer -t vcprompt-static -f "${thisdir}/Dockerfile.static"
+podman run --rm=true -v "${thisdir}:/work" localhost/vcprompt-static
+GPG_KEY=$(git config user.signingkey)
+gpg --local-user "$GPG_KEY" --armor --output vcprompt.asc --detach-sig vcprompt
