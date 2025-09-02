@@ -1,6 +1,8 @@
 vcprompt: version control information in your prompt
 ====================================================
 
+This is a fork of Greg Ward's [vcprompt](https://bitbucket.org/gward/vcprompt):
+
 vcprompt is a little C program that prints a short string with
 barebones information about the current working directory for various
 version control systems. You configure your shell to include the
@@ -38,9 +40,6 @@ To install it in your home directory:
 To make life easier for packagers, the Makefile also supports DESTDIR:
 
     make install DESTDIR=/tmp/packageroot PREFIX=/usr
-
-Please report build failures to the development mailing list,
-vcprompt-devel@googlegroups.com.
 
 vcprompt includes a fairly comprehensive test suite. If you want to
 run it, see "Testing" below.
@@ -223,14 +222,13 @@ Patches are welcome.  Please follow these guidelines:
 Author Contact
 ==============
 
-vcprompt was written by Greg Ward <greg at gerg dot ca>.
+vcprompt was written by Greg Ward.
 
-The latest version is available from either of my public Mercurial
-repositories:
+The latest versions used to be available from Greg's public Mercurial
+repositories, but have since been deleted:
 
-[http://hg.gerg.ca/vcprompt/](http://hg.gerg.ca/vcprompt/)
-
-[http://bitbucket.org/gward/vcprompt/](http://hg.gerg.ca/vcprompt/)
+* [http://hg.gerg.ca/vcprompt/](http://hg.gerg.ca/vcprompt/)
+* [http://bitbucket.org/gward/vcprompt/](http://hg.gerg.ca/vcprompt/)
 
 
 Other Contributors
