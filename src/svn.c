@@ -217,7 +217,7 @@ svn_read_xml(FILE *fp, char line[], int size, int line_num, result_t *result)
         debug("no 'revision=' line found in .svn/entries");
         return 0;
     }
-    if (sscanf(p, " %*[^\"]\"%[0-9]\"", rev) == 1) {
+    if (sscanf(p, " %*[^\"]\"%99[0-9]\"", rev) == 1) {
         result_set_revision(result, rev, -1);
         debug("read svn revision from .svn/entries: '%s'", rev);
     }
